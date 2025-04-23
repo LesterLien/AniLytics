@@ -14,14 +14,30 @@ function NavBar() {
                     Menu
                 </div>
                 <div className="navbarPage-text">
-                    Placeholder
+                    Dashboard
                 </div>
                 <div className="navbarPage-text">
-                    Placeholder
+                    User Demographics
                 </div>
                 <div className="navbarPage-text">
-                    Placeholder
+                    Anime Popularity & Ratings
                 </div>
+                <div className="navbarPage-text">
+                    Completion & Status Trends
+                </div>
+                <div className="navbarPage-text">
+                    User Activity
+                </div>
+                <div className="navbarPage-text">
+                    Production & Licensing
+                </div>
+                <div className="navbarPage-text">
+                    Genre Evolution
+                </div>
+                <div className="navbarPage-text">
+                    User Insights
+                </div>
+
             </div>
         </div>
     </div>
