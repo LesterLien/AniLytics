@@ -1,5 +1,6 @@
 import '../styles/NavBar.css';
 import logo from '../assets/images/logo.webp';
+import {Link} from 'react-router-dom';
 
 function NavBar() {
   return (
@@ -14,28 +15,31 @@ function NavBar() {
                     Menu
                 </div>
                 <div className="navbarPage-text">
-                    Dashboard
+                    <Link to="/dashboard">Dashboard</Link>
                 </div>
                 <div className="navbarPage-text">
-                    User Demographics
+                    <Link to="/demographics">User Demographics</Link>
                 </div>
                 <div className="navbarPage-text">
-                    Anime Popularity & Ratings
+                    <Link to="/popularity">Anime Popularity & Ratings</Link>
                 </div>
                 <div className="navbarPage-text">
-                    Completion & Status Trends
+                    <Link to="/status">Completion & Status Trends</Link>
                 </div>
                 <div className="navbarPage-text">
-                    User Activity
+                    <Link to="/activity">User Activity</Link>
                 </div>
                 <div className="navbarPage-text">
-                    Production & Licensing
+                    <Link to="/production">Production & Licensing</Link>
                 </div>
                 <div className="navbarPage-text">
-                    Genre Evolution
+                    <Link to="/genre">Genre Evolution</Link>
                 </div>
                 <div className="navbarPage-text">
-                    User Insights
+                    <Link to="/ratings">Ratings Correlation</Link>
+                </div>
+                <div className="navbarPage-text">
+                    <Link to="/insights">User Insights</Link>
                 </div>
 
             </div>

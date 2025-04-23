@@ -2,5 +2,12 @@
   color: black;
   background-color: white;
   padding: 5px;
-  font-family: sans-serif
+  font-family: sans-serif;
+  display: flex;
+  height: 99vh;
+}
+
+.page-content {
+  flex: 1; 
+  overflow-y: auto;
 }
