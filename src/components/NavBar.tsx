@@ -15,7 +15,7 @@ function NavBar() {
                     Menu
                 </div>
                 <div className="navbarPage-text">
-                    <Link to="/dashboard">Dashboard</Link>
+                    <Link to="/">Dashboard</Link>
                 </div>
                 <div className="navbarPage-text">
                     <Link to="/demographics">User Demographics</Link>

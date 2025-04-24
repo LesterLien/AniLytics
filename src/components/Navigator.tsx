@@ -13,7 +13,6 @@ function Navigator() {
     return (
         <Routes>
             <Route path="/" element={<Dashboard/>}/>
-            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/demographics" element={<Demographics/>}/>
             <Route path="/popularity" element={<Popularity/>}/>
             <Route path="/status" element={<Status/>}/>
