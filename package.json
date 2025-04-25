@@ -23,7 +23,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start:backend": "nodemon server/server.tsx",
+    "start:backend": "nodemon --exec tsx server/server.ts",
     "start:frontend": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
@@ -54,6 +54,7 @@
     "@types/react-bootstrap": "^0.32.37",
     "@types/react-router-dom": "^5.3.3",
     "ts-node": "^10.9.2",
+    "tsx": "^4.19.3",
     "typescript": "^4.9.5"
   }
 }
