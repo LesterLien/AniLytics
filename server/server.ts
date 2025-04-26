@@ -1,9 +1,11 @@
-import express from 'express';
 import { createClient } from '@supabase/supabase-js';
+const PORT = 4000;
+const express = require('express');
+const cors = require('cors');
 require('dotenv').config();
-
 const app = express();
-const port = 4000;
+app.use(cors());
+app.use(express.json());
 
 const supabase = createClient(
   process.env.SUPABASE_URL || '',
@@ -11,21 +13,51 @@ const supabase = createClient(
 );
 
 
-app.get('/test-supabase', async (req, res) => {
-  const { data, error } = await supabase
-    .from('anime') 
-    .select('*')
-    .limit(1);
+app.get('/user-age', async (req, res) => {
+    let { data: users, error } = await supabase
+        .from('users')
+        .select('birth_date');
+
+    if (error || !users) {
+        console.error('Supabase error:', error?.message);
+        return res.status(500).json({ error: error?.message });
+    }
+
+
+    res.json(users);
+});
+
+
+
+
+app.get('/anime', async (req, res) => {
+    let { data: anime, error } = await supabase
+        .from('anime')
+        .select('*');
 
   if (error) {
     console.error('Supabase error:', error.message);
     return res.status(500).json({ error: error.message });
   }
 
-  res.json({ message: 'Connected to Supabase!', data });
+  res.json(anime);
 });
 
+app.get('/users', async (req, res) => {
+    let { data: users, error } = await supabase
+        .from('users')
+        .select('*')
+    
+    if (error) {
+      console.error('Supabase error:', error.message);
+      return res.status(500).json({ error: error.message });
+    }
+  
+    res.json(users);
+  });
 
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+
+
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
 });
