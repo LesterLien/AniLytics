@@ -15,7 +15,7 @@ function NavBar() {
                     Menu
                 </div>
                 <div className="navbarPage-text">
-                    <Link to="/dashboard">Dashboard</Link>
+                    <Link to="/">Dashboard</Link>
                 </div>
                 <div className="navbarPage-text">
                     <Link to="/demographics">User Demographics</Link>
@@ -27,16 +27,16 @@ function NavBar() {
                     <Link to="/status">Completion & Status Trends</Link>
                 </div>
                 <div className="navbarPage-text">
-                    <Link to="/activity">User Activity</Link>
+                    <Link to="/activity">User Engagement</Link>
                 </div>
                 <div className="navbarPage-text">
-                    <Link to="/production">Production & Licensing</Link>
+                    <Link to="/production">Studios & Sources</Link>
                 </div>
                 <div className="navbarPage-text">
-                    <Link to="/genre">Genre Evolution</Link>
+                    <Link to="/genre">Genre Trends Over Time</Link>
                 </div>
                 <div className="navbarPage-text">
-                    <Link to="/ratings">Ratings Correlation</Link>
+                    <Link to="/ratings">Ratings & Correlations</Link>
                 </div>
                 <div className="navbarPage-text">
                     <Link to="/insights">User Insights</Link>
