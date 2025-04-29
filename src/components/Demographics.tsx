@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
-import { Bar } from "react-chartjs-2";
-import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, LogarithmicScale, Tooltip, Title } from "chart.js";
+import { Bar, Pie } from "react-chartjs-2";
+import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, LogarithmicScale, Tooltip, Title, ArcElement, Legend } from "chart.js";
 import '../styles/Demographics.css';
 
-ChartJS.register(BarElement, CategoryScale, LinearScale, LogarithmicScale, Tooltip, Title);
+ChartJS.register(BarElement, CategoryScale, LinearScale, LogarithmicScale, Tooltip, Title, ArcElement, Legend);
 
 function Demographics() {
   const [ageBars, setAgeBars] = useState<Record<string, number>>({});
+  const [genderBars, setGenderBars] = useState<Record<string, number>>({});
 
   useEffect(() => {
+
     fetch('http://localhost:4000/user-age')
       .then(res => res.json())
-      .then(data => setAgeBars(data))
+      .then(ageData => setAgeBars(ageData))
       .catch(error => console.error(error));
   }, []);
 
@@ -23,20 +25,20 @@ function Demographics() {
 
   const ageCounts = sortedAgeLabels.map(ageRange => ageBars[ageRange]);
 
-  const data = {
+  const ageData = {
     labels: sortedAgeLabels,
     datasets: [
       {
-        label: 'User Ages',
+        label: 'Age Distribution',
         data: ageCounts,
-        backgroundColor: 'rgba(77, 155, 204, 0.6)',  
+        backgroundColor: 'rgba(115, 204, 77, 0.6)',  
         borderColor: 'rgba(80, 77, 77, 0.6)',
         borderWidth: 2,
       },
     ],
   };
 
-  const options = {
+  const ageOptions = {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
@@ -76,7 +78,57 @@ function Demographics() {
     },
   };
   
+  useEffect(() => {
+    fetch('http://localhost:4000/user-gender')
+      .then(res => res.json())
+      .then(genderData => setGenderBars(genderData))
+      .catch(error => console.error(error));
+  })
+
+  const genderLabels = Object.keys(genderBars);
+  const genderCounts = genderLabels.map(label => genderBars[label]);
+
+  const genderData = {
+    labels: genderLabels,
+    datasets: [
+      {
+        label: 'Gender Distribution',
+        data: genderCounts,
+        backgroundColor: [
+          'rgba(255, 99, 133, 0.48)',
+          'rgba(54, 162, 235, 0.6)',   
+          'rgba(255, 206, 86, 0.6)',  
+        ],
+        borderColor: 'rgba(80, 77, 77, 0.6)',
+        borderWidth: 1,
+      },
+    ],
+  };
   
+  const genderOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      title: {
+        display: true,
+        text: 'Gender Distribution',
+        font: {
+          size: 20,
+          weight: 700,
+        },
+        color: '#333',
+      },
+      legend: {
+        position: 'top' as const,
+        labels: {
+          font: {
+            size: 14,
+          },
+          color: '#333',
+        },
+      },
+    },
+  };
 
   return (
     <div className="demographicsPage-body">
@@ -85,9 +137,15 @@ function Demographics() {
       </div>
       <div className="demographicsPage-ageGraph-container">
         <div className="demographicsPage-ageGraph">
-          <Bar data={data} options={options} />
+          <Bar data={ageData} options={ageOptions} />
         </div>
       </div>
+      <div className="demographicsPage-genderGraph-container">
+        <div className="demographicsPage-genderGraph">
+          <Pie data={genderData} options={genderOptions} />
+        </div>
+      </div>
+
     </div>
   );
 }
