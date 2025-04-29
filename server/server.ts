@@ -83,6 +83,39 @@ app.get('/user-gender', async (req, res) => {
   res.json(user_genders);
 });
 
+app.get('/user-location', async (req, res) => {
+  let { data: users, error } = await supabase
+        .from('users')
+        .select('location');
+      
+  if (error) {
+      console.error('Supabase error:', error.message);
+      return res.status(500).json({ error: error.message });
+  }
+
+  if(!users) {
+      return res.status(500).json({error: 'User data is empty'});
+  }
+
+  const user_locations: Record<string, number> = {};
+
+  users
+    .filter((user: { location: string | null }) => user.location !== null)
+    .forEach((user: { location: string }) => {
+      const location = user.location;
+      if (location) {
+        user_locations[location] = (user_locations[location] || 0) + 1; 
+      } 
+  });
+  const locationCounts = Object.entries(user_locations)
+    .sort((a, b) => b[1] - a[1]); 
+
+  const sortedLocationCounts  = Object.fromEntries(locationCounts);
+
+  res.json(sortedLocationCounts);
+})
+
+
 
 
 app.get('/anime', async (req, res) => {
