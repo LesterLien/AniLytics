@@ -1,0 +1,41 @@
+.demographicsPage-body {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    
+}
+
+.demographicsPage-header {
+    width: 100%;
+    height: 7%;
+    border-bottom: 2px solid #EBEBEB;
+    margin-bottom: 10px;
+}
+
+.demographicsPage-title {
+    font-weight: bold;
+}
+
+.demographicsPage-ageGraph-container {
+    height: 50%;
+    display: flex;
+    flex-direction: column;
+    border: 2px solid #EBEBEB;
+    border-radius: 10px;
+}
+
+.demographicsPage-graph-title {
+    display: flex;
+    justify-content: center;  
+    align-items: center;
+}
+
+.demographicsPage-ageGraph {
+    display: flex;
+    justify-content: center;  
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    overflow-x: auto;
+}
