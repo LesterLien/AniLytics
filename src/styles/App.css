@@ -4,7 +4,7 @@
   padding: 5px;
   font-family: sans-serif;
   display: flex;
-  height: 99vh;
+  min-height: 99vh;
 }
 
 .page-content {

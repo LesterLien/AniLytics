@@ -21,7 +21,6 @@ function Navigator() {
             <Route path="/genre" element={<Genres/>}/>
             <Route path="/ratings" element={<Ratings/>}/>
             <Route path="/insights" element={<Insights/>}/>
-            
         </Routes>
     );
 }

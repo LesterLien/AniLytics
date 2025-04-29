@@ -1,6 +1,6 @@
 .navbarPage-body {
     position: sticky;
-    height: 99vh;
+    min-height: 99vh;
     width: 240px;
     color: white;
     border-radius: 5px;
