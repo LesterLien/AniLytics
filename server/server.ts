@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { time } from 'node:console';
 const PORT = 4000;
 const express = require('express');
 const cors = require('cors');
@@ -115,34 +116,59 @@ app.get('/user-location', async (req, res) => {
   res.json(sortedLocationCounts);
 })
 
-
-
-
-app.get('/anime', async (req, res) => {
-    let { data: anime, error } = await supabase
-        .from('anime')
-        .select('*');
-
-  if (error) {
-    console.error('Supabase error:', error.message);
-    return res.status(500).json({ error: error.message });
-  }
-
-  res.json(anime);
-});
-
-app.get('/users', async (req, res) => {
-    let { data: users, error } = await supabase
+app.get('/user-time', async (req, res) => {
+  let { data: users, error } = await supabase
         .from('users')
-        .select('*')
-    
-    if (error) {
+        .select('user_days_spent_watching');
+      
+  if (error) {
       console.error('Supabase error:', error.message);
       return res.status(500).json({ error: error.message });
-    }
-  
-    res.json(users);
+  }
+
+  if(!users) {
+      return res.status(500).json({error: 'User data is empty'});
+  }
+  let totalTime: number = 0;
+
+  users
+    .filter((user: { user_days_spent_watching: string | null }) => user.user_days_spent_watching !== null)
+    .forEach((user: { user_days_spent_watching: string }) => {
+      const time = parseFloat(user.user_days_spent_watching);
+      totalTime+=time;
   });
+  
+ const avgTimePerUser = users.length > 0 ? totalTime / users.length : 0;
+
+  res.json(avgTimePerUser);
+});
+
+
+// app.get('/anime', async (req, res) => {
+//     let { data: anime, error } = await supabase
+//         .from('anime')
+//         .select('*');
+
+//   if (error) {
+//     console.error('Supabase error:', error.message);
+//     return res.status(500).json({ error: error.message });
+//   }
+
+//   res.json(anime);
+// });
+
+// app.get('/users', async (req, res) => {
+//     let { data: users, error } = await supabase
+//         .from('users')
+//         .select('*')
+    
+//     if (error) {
+//       console.error('Supabase error:', error.message);
+//       return res.status(500).json({ error: error.message });
+//     }
+  
+//     res.json(users);
+//   });
 
 
 
