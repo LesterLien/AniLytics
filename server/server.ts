@@ -137,12 +137,53 @@ app.get('/user-time', async (req, res) => {
       const time = parseFloat(user.user_days_spent_watching);
       totalTime+=time;
   });
-  
- const avgTimePerUser = users.length > 0 ? totalTime / users.length : 0;
+  const userCount = users.length;
+  const avgTimePerUser = userCount > 0 ? totalTime / userCount : 0;
 
   res.json(avgTimePerUser);
 });
 
+app.get('/user-animeStatus', async (req, res) => {
+  let { data: users, error } = await supabase
+        .from('users')
+        .select('user_watching, user_completed, user_onhold, user_dropped, user_plantowatch');
+    
+  if (error) {
+      console.error('Supabase error:', error.message);
+      return res.status(500).json({ error: error.message });
+  }
+
+  if(!users) {
+      return res.status(500).json({error: 'User data is empty'});
+  }
+
+  let total = {
+    watching: 0,
+    completed: 0,
+    onhold: 0,
+    dropped: 0,
+    plantowatch: 0
+  };
+
+ users.forEach(user => {
+    total.watching += parseInt(user.user_watching) || 0;
+    total.completed += parseInt(user.user_completed) || 0;
+    total.onhold += parseInt(user.user_onhold) || 0;
+    total.dropped += parseInt(user.user_dropped) || 0;
+    total.plantowatch += parseInt(user.user_plantowatch) || 0;
+  });
+  
+  const userCount = users.length;
+  const averages = {
+    watching: total.watching / userCount,
+    completed: total.completed / userCount,
+    onhold: total.onhold / userCount,
+    dropped: total.dropped / userCount,
+    plantowatch: total.plantowatch / userCount
+  };
+
+  res.json({ total, averages });
+});
 
 // app.get('/anime', async (req, res) => {
 //     let { data: anime, error } = await supabase
