@@ -21,10 +21,10 @@ function NavBar() {
                     <Link to="/demographics">User Demographics</Link>
                 </div>
                 <div className="navbarPage-text">
-                    <Link to="/popularity">Anime Popularity & Ratings</Link>
+                    <Link to="/popularity">Top Anime Insights</Link>
                 </div>
                 <div className="navbarPage-text">
-                    <Link to="/status">Completion & Status Trends</Link>
+                    <Link to="/status">User Completion Trends</Link>
                 </div>
                 <div className="navbarPage-text">
                     <Link to="/activity">User Engagement</Link>

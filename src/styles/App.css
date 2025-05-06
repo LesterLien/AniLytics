@@ -1,7 +1,7 @@
 .App {
   color: black;
   background-color: white;
-  margin: 5px;
+  padding: 5px;
   font-family: sans-serif;
   display: flex;
   min-height: 99vh;
