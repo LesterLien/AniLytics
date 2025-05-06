@@ -144,7 +144,7 @@ function Demographics() {
     plugins: {
       title: {
         display: true,
-        text: 'Top Locations',
+        text: 'Top 20 Locations',
         font: {
           size: 20,
           weight: 700,
