@@ -65,6 +65,78 @@ app.get('/user-demographics', async (req, res) => {
   }
 });
 
+app.get('/anime-popularity', async (req, res) => {
+  try {
+    const ratingResult = await pool.query(
+      `SELECT rank, title, scored_by
+       FROM anime 
+       WHERE rank IS NOT NULL AND scored_by >= 100000 
+       ORDER BY rank ASC 
+       LIMIT 10`
+    );
+
+    const watchedResult = await pool.query(
+      `SELECT members, title
+       FROM anime 
+       WHERE members IS NOT NULL
+       ORDER BY members DESC
+       LIMIT 10`
+    );
+
+    const genreAiringResult = await pool.query(
+      `SELECT genre, aired_from_year
+       FROM anime`
+    );
+
+
+    const rating = ratingResult.rows;
+    const watched = watchedResult.rows;
+    const genre_airing = genreAiringResult.rows;
+
+    const genreData = {};
+    const airingData = {};
+
+
+    const ratingData = rating.map(anime => ({
+      title: anime.title,
+      rank: anime.rank,
+      scored_by: anime.scored_by,
+    }));
+
+    const watchedData = watched.map(anime => ({
+      title: anime.title,
+      members: anime.members,
+    }));
+
+
+    genre_airing.forEach(anime => {
+      if (anime.genre) {
+        anime.genre.split(',').forEach(genres => {
+          const genre = genres.trim();
+          genreData[genre] = (genreData[genre] || 0) + 1;
+        });
+      }
+
+      if (anime.aired_from_year !== null) {
+        const year = anime.aired_from_year.toString();
+        airingData[year] = (airingData[year] || 0) + 1;
+      }
+
+    });
+
+    const sortedGenre = Object.fromEntries(
+      Object.entries(genreData as Record<string, number>).sort(
+        (a, b) => b[1] - a[1]
+      )
+    );
+
+    res.json({ rating: ratingData, watched: watchedData, genre: sortedGenre, airing: airingData});
+
+  } catch (error) {
+    console.error('PostgreSQL error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.get('/user-time', async (req, res) => {
   try {
