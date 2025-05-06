@@ -17,10 +17,9 @@ const pool = new Pool({
   port: process.env.PG_PORT,
 });
 
-
-app.get('/user-age', async (req, res) => {
+app.get('/user-demographics', async (req, res) => {
   try {
-    const result = await pool.query('SELECT birth_date FROM users');
+    const result = await pool.query('SELECT birth_date, gender, location FROM users');
     const users = result.rows;
 
     if (!users || users.length === 0) {
@@ -28,97 +27,43 @@ app.get('/user-age', async (req, res) => {
     }
 
     const currentDay = new Date();
-    const user_birthdays = {};
+    const ageData = {};
+    const genderData = {};
+    const locationData = {};
 
-    users
-      .filter(user => user.birth_date !== null)
-      .forEach(user => {
-        const user_birth_date = new Date(user.birth_date);
-        let age = currentDay.getFullYear() - user_birth_date.getFullYear();
-        const month = currentDay.getMonth() - user_birth_date.getMonth();
-
-        if (month < 0 || (month === 0 && currentDay.getDate() < user_birth_date.getDate())) {
+    users.forEach(user => {
+      if (user.birth_date) {
+        const birthDate = new Date(user.birth_date);
+        let age = currentDay.getFullYear() - birthDate.getFullYear();
+        const month = currentDay.getMonth() - birthDate.getMonth();
+        if (month < 0 || (month === 0 && currentDay.getDate() < birthDate.getDate())) {
           age--;
         }
+        const label = `${Math.floor(age / 2) * 2}-${Math.floor(age / 2) * 2 + 1}`;
+        ageData[label] = (ageData[label] || 0) + 1;
+      }
 
-        const ageLabel = Math.floor(age / 2) * 2;
-        const ageRangeLabel = `${ageLabel}-${ageLabel + 1}`;
+      if(user.gender) {
+        genderData[user.gender] = (genderData[user.gender] || 0) + 1;
+      }
 
-        if (user_birthdays[ageRangeLabel]) {
-          user_birthdays[ageRangeLabel]++;
-        } else {
-          user_birthdays[ageRangeLabel] = 1;
-        }
-      });
+      if(user.location) {
+        locationData[user.location] = (locationData[user.location] || 0) + 1;
+      }
+    });
 
-    res.json(user_birthdays);
-  } catch (error) {
-    console.error('PostgreSQL error:', error.message);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-
-app.get('/user-gender', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT gender FROM users');
-    const users = result.rows;
-
-    if (!users || users.length === 0) {
-      return res.status(500).json({ error: 'User data is empty' });
-    }
-
-    const user_genders = {};
-
-    users
-      .filter(user => user.gender !== null)
-      .forEach(user => {
-        const gender = user.gender;
-        if (gender) {
-          user_genders[gender] = (user_genders[gender] || 0) + 1;
-        }
-      });
-
-    res.json(user_genders);
-  } catch (error) {
-    console.error('PostgreSQL error:', error.message);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-
-app.get('/user-location', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT location FROM users');
-    const users = result.rows;
-
-    if (!users || users.length === 0) {
-      return res.status(500).json({ error: 'User data is empty' });
-    }
-
-    const user_locations: Record<string, number> = {};
-
-    users
-      .filter(user => user.location !== null)
-      .forEach(user => {
-        const location = user.location;
-        if (location) {
-          user_locations[location] = (user_locations[location] || 0) + 1;
-        }
-      });
-
-    const locationCounts = Object.entries(user_locations) as [string, number][];
-    const sortedLocationCounts = Object.fromEntries(
-      locationCounts.sort((a, b) => b[1] - a[1])
+    const sortedLocation = Object.fromEntries(
+      Object.entries(locationData as Record<string, number>).sort(
+        (a, b) => b[1] - a[1]
+      )
     );
-
-    res.json(sortedLocationCounts);
+    res.json({ age: ageData, gender: genderData, location: sortedLocation });
+    
   } catch (error) {
     console.error('PostgreSQL error:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
-
 
 
 app.get('/user-time', async (req, res) => {
