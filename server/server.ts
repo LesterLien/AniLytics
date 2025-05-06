@@ -1,148 +1,244 @@
-import { createClient } from '@supabase/supabase-js';
 const PORT = 4000;
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const app = express();
+const { Pool } = require('pg');
+
+
 app.use(cors());
 app.use(express.json());
 
-const supabase = createClient(
-  process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || '',
-);
-
-
-app.get('/user-age', async (req, res) => {
-  let { data: users, error } = await supabase
-      .from('users')
-      .select('birth_date');
-
-  if (error) {
-      console.error('Supabase error:', error.message);
-      return res.status(500).json({ error: error.message });
-  }
-
-  if(!users) {
-      return res.status(500).json({error: 'User data is empty'});
-  }
-
-  const currentDay = new Date();
-  
-  const user_birthdays: Record<string, number> = {};
-
-  users
-    .filter((user: { birth_date: string | null }) => user.birth_date !== null)
-    .forEach((user: { birth_date: string }) => {
-        const user_birth_date = new Date(user.birth_date);
-        
-        let age = currentDay.getFullYear() - user_birth_date.getFullYear();
-        const month = currentDay.getMonth() - user_birth_date.getMonth();
-
-
-        if (month < 0 || (month === 0 && currentDay.getDate() < user_birth_date.getDate())) {
-            age--;
-        }
-
-        const ageLabel = Math.floor(age / 2) * 2;
-        const ageRangeLabel = `${ageLabel}-${ageLabel + 1}`;
-
-        if (user_birthdays[ageRangeLabel]) {
-          user_birthdays[ageRangeLabel]++;
-        } else {
-          user_birthdays[ageRangeLabel] = 1;
-        }
-    });
-  res.json(user_birthdays);
+const pool = new Pool({
+  user: process.env.PG_USER,
+  host: process.env.PG_HOST,
+  database: process.env.PG_DATABASE,
+  password: process.env.PG_PASSWORD,
+  port: process.env.PG_PORT,
 });
 
-app.get('/user-gender', async (req, res) => {
-  let { data: users, error } = await supabase
-        .from('users')
-        .select('gender');
-      
-  if (error) {
-      console.error('Supabase error:', error.message);
-      return res.status(500).json({ error: error.message });
-  }
+app.get('/user-demographics', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT birth_date, gender, location FROM users');
+    const users = result.rows;
 
-  if(!users) {
-      return res.status(500).json({error: 'User data is empty'});
-  }
+    if (!users || users.length === 0) {
+      return res.status(500).json({ error: 'User data is empty' });
+    }
 
-  const user_genders: Record<string, number> = {};
+    const currentDay = new Date();
+    const ageData = {};
+    const genderData = {};
+    const locationData = {};
 
-  users
-    .filter((user: { gender: string | null }) => user.gender !== null)
-    .forEach((user: { gender: string }) => {
-      const gender = user.gender;
-      if (gender) {
-        user_genders[gender] = (user_genders[gender] || 0) + 1; 
+    users.forEach(user => {
+      if (user.birth_date) {
+        const birthDate = new Date(user.birth_date);
+        let age = currentDay.getFullYear() - birthDate.getFullYear();
+        const month = currentDay.getMonth() - birthDate.getMonth();
+        if (month < 0 || (month === 0 && currentDay.getDate() < birthDate.getDate())) {
+          age--;
+        }
+        const label = `${Math.floor(age / 2) * 2}-${Math.floor(age / 2) * 2 + 1}`;
+        ageData[label] = (ageData[label] || 0) + 1;
       }
-  });
-  res.json(user_genders);
+
+      if(user.gender) {
+        genderData[user.gender] = (genderData[user.gender] || 0) + 1;
+      }
+
+      if(user.location) {
+        locationData[user.location] = (locationData[user.location] || 0) + 1;
+      }
+    });
+
+    const sortedLocation = Object.fromEntries(
+      Object.entries(locationData as Record<string, number>).sort(
+        (a, b) => b[1] - a[1]
+      )
+    );
+    res.json({ age: ageData, gender: genderData, location: sortedLocation });
+    
+  } catch (error) {
+    console.error('PostgreSQL error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
 });
 
-app.get('/user-location', async (req, res) => {
-  let { data: users, error } = await supabase
-        .from('users')
-        .select('location');
-      
-  if (error) {
-      console.error('Supabase error:', error.message);
-      return res.status(500).json({ error: error.message });
+app.get('/anime-popularity', async (req, res) => {
+  try {
+    const ratingResult = await pool.query(
+      `SELECT rank, title, scored_by
+       FROM anime 
+       WHERE rank IS NOT NULL AND scored_by >= 100000 
+       ORDER BY rank ASC 
+       LIMIT 10`
+    );
+
+    const watchedResult = await pool.query(
+      `SELECT members, title
+       FROM anime 
+       WHERE members IS NOT NULL
+       ORDER BY members DESC
+       LIMIT 10`
+    );
+
+    const genreAiringResult = await pool.query(
+      `SELECT genre, aired_from_year
+       FROM anime`
+    );
+
+
+    const rating = ratingResult.rows;
+    const watched = watchedResult.rows;
+    const genre_airing = genreAiringResult.rows;
+
+    const genreData = {};
+    const airingData = {};
+
+
+    const ratingData = rating.map(anime => ({
+      title: anime.title,
+      rank: anime.rank,
+      scored_by: anime.scored_by,
+    }));
+
+    const watchedData = watched.map(anime => ({
+      title: anime.title,
+      members: anime.members,
+    }));
+
+
+    genre_airing.forEach(anime => {
+      if (anime.genre) {
+        anime.genre.split(',').forEach(genres => {
+          const genre = genres.trim();
+          genreData[genre] = (genreData[genre] || 0) + 1;
+        });
+      }
+
+      if (anime.aired_from_year !== null) {
+        const year = anime.aired_from_year.toString();
+        airingData[year] = (airingData[year] || 0) + 1;
+      }
+
+    });
+
+    const sortedGenre = Object.fromEntries(
+      Object.entries(genreData as Record<string, number>).sort(
+        (a, b) => b[1] - a[1]
+      )
+    );
+
+    res.json({ rating: ratingData, watched: watchedData, genre: sortedGenre, airing: airingData});
+
+  } catch (error) {
+    console.error('PostgreSQL error:', error.message);
+    res.status(500).json({ error: error.message });
   }
+});
 
-  if(!users) {
-      return res.status(500).json({error: 'User data is empty'});
+app.get('/user-time', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT user_days_spent_watching FROM users');
+    const users = result.rows;
+
+    if (!users || users.length === 0) {
+      return res.status(500).json({ error: 'User data is empty' });
+    }
+
+    let totalTime = 0;
+
+    users
+      .filter(user => user.user_days_spent_watching !== null)
+      .forEach(user => {
+        const time = parseFloat(user.user_days_spent_watching);
+        totalTime += time;
+      });
+
+    const userCount = users.length;
+    const avgTimePerUser = userCount > 0 ? totalTime / userCount : 0;
+
+    res.json(avgTimePerUser);
+  } catch (error) {
+    console.error('PostgreSQL error:', error.message);
+    res.status(500).json({ error: error.message });
   }
-
-  const user_locations: Record<string, number> = {};
-
-  users
-    .filter((user: { location: string | null }) => user.location !== null)
-    .forEach((user: { location: string }) => {
-      const location = user.location;
-      if (location) {
-        user_locations[location] = (user_locations[location] || 0) + 1; 
-      } 
-  });
-  const locationCounts = Object.entries(user_locations)
-    .sort((a, b) => b[1] - a[1]); 
-
-  const sortedLocationCounts  = Object.fromEntries(locationCounts);
-
-  res.json(sortedLocationCounts);
-})
+});
 
 
+app.get('/user-animeStatus', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT user_watching, user_completed, user_onhold, user_dropped, user_plantowatch 
+      FROM users
+    `);
+    const users = result.rows;
+
+    if (!users || users.length === 0) {
+      return res.status(500).json({ error: 'User data is empty' });
+    }
+
+    let total = {
+      watching: 0,
+      completed: 0,
+      onhold: 0,
+      dropped: 0,
+      plantowatch: 0
+    };
+
+    users.forEach(user => {
+      total.watching += parseInt(user.user_watching) || 0;
+      total.completed += parseInt(user.user_completed) || 0;
+      total.onhold += parseInt(user.user_onhold) || 0;
+      total.dropped += parseInt(user.user_dropped) || 0;
+      total.plantowatch += parseInt(user.user_plantowatch) || 0;
+    });
+
+    const userCount = users.length;
+    const averages = {
+      watching: total.watching / userCount,
+      completed: total.completed / userCount,
+      onhold: total.onhold / userCount,
+      dropped: total.dropped / userCount,
+      plantowatch: total.plantowatch / userCount
+    };
+
+    res.json({ total, averages });
+  } catch (error) {
+    console.error('PostgreSQL error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 
 app.get('/anime', async (req, res) => {
-    let { data: anime, error } = await supabase
-        .from('anime')
-        .select('*');
-
-  if (error) {
-    console.error('Supabase error:', error.message);
+  try {
+    const result = await pool.query('SELECT * FROM anime');
+    const anime = result.rows;
+    res.json(anime);
+  } catch (error) {
+    console.error('Error fetching anime data:', error.message);
     return res.status(500).json({ error: error.message });
   }
-
-  res.json(anime);
 });
 
 app.get('/users', async (req, res) => {
-    let { data: users, error } = await supabase
-        .from('users')
-        .select('*')
-    
-    if (error) {
-      console.error('Supabase error:', error.message);
-      return res.status(500).json({ error: error.message });
-    }
-  
+  try {
+    const result = await pool.query('SELECT * FROM users');
+    const users = result.rows.map(user => ({
+      ...user,
+      birth_date: user.birth_date?.toISOString().split('T')[0],
+      join_date: user.join_date?.toISOString().split('T')[0],
+      last_online: user.last_online?.toISOString().split('T')[0]
+    }));
     res.json(users);
-  });
+  } catch (error) {
+    console.error('Error fetching users data:', error.message);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 
 
 
