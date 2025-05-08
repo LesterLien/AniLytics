@@ -8,21 +8,29 @@ ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Title, ArcElem
 
 function Popularity() {
   const [ratingBars, setRatingBars] = useState<Record<string, number>>({});
+  const [watchedBars, setWatchedBars] = useState<Record<string, number>>({});
 
   useEffect(() => {
     fetch("http://localhost:4000/anime-popularity")
       .then(res => res.json())
-      .then(({rating}) => {
+      .then(({rating, watched}) => {
         const ratingsObject: Record<string, number> = {};
+        const watchedObject: Record<string, number> = {};
+
         rating.forEach((anime: { title: string; score: number }) => {
           ratingsObject[anime.title] = anime.score;
         });
+        watched.forEach((anime: { title: string; members: number }) => {
+          watchedObject[anime.title] = anime.members;
+        });
+
+
         setRatingBars(ratingsObject);
+        setWatchedBars(watchedObject);
       })
       .catch(error => console.error(error));
   }, []);
 
-  
   const ratingLabels = Object.keys(ratingBars).slice(0,10);
   const ratingCounts = ratingLabels.map(title => ratingBars[title]);
 
@@ -63,18 +71,65 @@ function Popularity() {
     },
   };
 
+  const watchedLabels = Object.keys(watchedBars).slice(0,10);
+  const watchedCounts = watchedLabels.map(title => watchedBars[title]);
+
+  const watchedData = {
+    labels: watchedLabels,
+    datasets: [
+      {
+        label: 'Members',
+        data: watchedCounts,
+        backgroundColor: 'rgba(115, 204, 77, 0.6)',  
+        borderColor: 'rgba(80, 77, 77, 0.6)',
+        borderWidth: 2,
+      },
+    ],
+  };
+
+  const watchedOptions = {
+    indexAxis: 'y' as const,
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      title: {
+        display: true,
+        text: 'Top 10 Anime Watched',
+        font: {
+          size: 20,
+          weight: 700,
+        },
+      },
+      legend: {
+        display: true,
+      },
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+      },
+    },
+  };
+
     return (
-       <div className="popularityPage-body">
-          <div className= "popularityPage-header">
-            <h2 className="popularityPage-title">Top Anime Insights</h2>
-          </div>
-          <div className="popularityPage-ratingGraph-container">
-            <div className="popularityPage-ratingGraph">
-              <Bar data={ratingData} options={ratingOptions} />
-            </div>
-          </div>
-          
+    <div className="popularityPage-body">
+        <div className= "popularityPage-header">
+          <h2 className="popularityPage-title">Top Anime Insights</h2>
         </div>
+
+        <div className="popularityPage-ratingGraph-container">
+          <div className="popularityPage-ratingGraph">
+            <Bar data={ratingData} options={ratingOptions} />
+          </div>
+        </div>
+
+        <div className="popularityPage-watchedGraph-container">
+          <div className="popularityPage-watchedGraph">
+            <Bar data={watchedData} options={watchedOptions} />
+          </div>
+        </div>
+        
+      </div>
     );
 }
 

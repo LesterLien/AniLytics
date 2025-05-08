@@ -17,7 +17,9 @@
     font-weight: bold;
 }
 
-.popularityPage-ratingGraph-container {
+.popularityPage-ratingGraph-container, 
+.popularityPage-watchedGraph-container 
+{
     height: 430px;
     display: flex;
     flex-direction: column;
@@ -27,7 +29,8 @@
     padding: 5px;
 }
 
-.popularityPage-ratingGraph {
+.popularityPage-ratingGraph,
+.popularityPage-watchedGraph {
     display: flex;
     justify-content: center;  
     align-items: center;
