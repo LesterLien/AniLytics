@@ -68,7 +68,7 @@ app.get('/user-demographics', async (req, res) => {
 app.get('/anime-popularity', async (req, res) => {
   try {
     const ratingResult = await pool.query(
-      `SELECT rank, title, scored_by
+      `SELECT rank, title, scored_by, score
        FROM anime 
        WHERE rank IS NOT NULL AND scored_by >= 100000 
        ORDER BY rank ASC 
@@ -99,8 +99,7 @@ app.get('/anime-popularity', async (req, res) => {
 
     const ratingData = rating.map(anime => ({
       title: anime.title,
-      rank: anime.rank,
-      scored_by: anime.scored_by,
+      score: anime.score,
     }));
 
     const watchedData = watched.map(anime => ({
