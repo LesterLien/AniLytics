@@ -9,11 +9,13 @@ ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Title, ArcElem
 function Popularity() {
   const [ratingBars, setRatingBars] = useState<Record<string, number>>({});
   const [watchedBars, setWatchedBars] = useState<Record<string, number>>({});
+  const [genreBars, setGenreBars] = useState<Record<string, number>>({});
+
 
   useEffect(() => {
     fetch("http://localhost:4000/anime-popularity")
       .then(res => res.json())
-      .then(({rating, watched}) => {
+      .then(({rating, watched, genre}) => {
         const ratingsObject: Record<string, number> = {};
         const watchedObject: Record<string, number> = {};
 
@@ -27,6 +29,7 @@ function Popularity() {
 
         setRatingBars(ratingsObject);
         setWatchedBars(watchedObject);
+        setGenreBars(genre);
       })
       .catch(error => console.error(error));
   }, []);
@@ -110,6 +113,59 @@ function Popularity() {
       },
     },
   };
+  
+  const genreLabels = Object.keys(genreBars).slice(0,10);
+  const genreCounts = genreLabels.map(genre => genreBars[genre]);
+
+  const genreData = {
+    labels: genreLabels,
+    datasets: [
+      {
+        label: 'User Counts',
+        data: genreCounts,
+        backgroundColor: [
+          'rgba(255, 99, 133, 0.48)',
+          'rgba(54, 162, 235, 0.6)',   
+          'rgba(255, 206, 86, 0.6)',
+          'rgba(88, 255, 79, 0.6)',
+          'rgba(255, 151, 86, 0.6)',
+          'rgba(255, 86, 241, 0.6)',
+          'rgba(86, 255, 207, 0.6)',
+          'rgba(86, 92, 255, 0.6)',
+          'rgba(255, 86, 86, 0.6)',
+          'rgba(173, 86, 255, 0.6)',
+        ],
+        borderColor: 'rgba(80, 77, 77, 0.6)',
+        borderWidth: 1,
+      },
+    ],
+  };
+  
+  const genreOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      title: {
+        display: true,
+        text: 'Top 10 Anime Genres',
+        font: {
+          size: 20,
+          weight: 700,
+        },
+        color: '#333',
+      },
+      legend: {
+        position: 'top' as const,
+        labels: {
+          font: {
+            size: 14,
+          },
+          color: '#333',
+        },
+      },
+    },
+  };
+
 
     return (
     <div className="popularityPage-body">
@@ -126,6 +182,12 @@ function Popularity() {
         <div className="popularityPage-watchedGraph-container">
           <div className="popularityPage-watchedGraph">
             <Bar data={watchedData} options={watchedOptions} />
+          </div>
+        </div>
+
+        <div className="popularityPage-genreGraph-container">
+          <div className="popularityPage-genreGraph">
+            <Pie data={genreData} options={genreOptions} />
           </div>
         </div>
         
