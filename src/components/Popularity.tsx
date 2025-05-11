@@ -1,21 +1,22 @@
 import '../styles/Popularity.css';
 import { useEffect, useState } from "react";
-import { Bar, Pie } from "react-chartjs-2";
-import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip, Title, ArcElement, Legend } from "chart.js";
+import { Bar, Pie, Line } from "react-chartjs-2";
+import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip, Title, ArcElement, Legend, LineElement, PointElement} from "chart.js";
 
-ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Title, ArcElement, Legend);
+ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Title, ArcElement, Legend, LineElement, PointElement);
 
 
 function Popularity() {
   const [ratingBars, setRatingBars] = useState<Record<string, number>>({});
   const [watchedBars, setWatchedBars] = useState<Record<string, number>>({});
   const [genreBars, setGenreBars] = useState<Record<string, number>>({});
+  const [airingBars, setAiringBars] = useState<Record<string, number>>({});
 
 
   useEffect(() => {
     fetch("http://localhost:4000/anime-popularity")
       .then(res => res.json())
-      .then(({rating, watched, genre}) => {
+      .then(({rating, watched, genre, airing}) => {
         const ratingsObject: Record<string, number> = {};
         const watchedObject: Record<string, number> = {};
 
@@ -30,6 +31,8 @@ function Popularity() {
         setRatingBars(ratingsObject);
         setWatchedBars(watchedObject);
         setGenreBars(genre);
+        setAiringBars(airing);
+
       })
       .catch(error => console.error(error));
   }, []);
@@ -166,33 +169,81 @@ function Popularity() {
     },
   };
 
+  const airingLabels = Object.keys(airingBars);
+  const airingCounts = airingLabels.map(airing => airingBars[airing]);
 
-    return (
-    <div className="popularityPage-body">
-        <div className= "popularityPage-header">
-          <h2 className="popularityPage-title">Top Anime Insights</h2>
-        </div>
+  const airingData = {
+    labels: airingLabels,
+    datasets: [
+      {
+        label: 'Anime Counts',
+        data: airingCounts,
+        backgroundColor: 'rgba(54, 162, 235, 0.6)',  
+        borderColor: 'rgba(54, 162, 235, 0.6)',
+        fill: false,
+        tension: 0.1
+      },
+    ],
+  };
 
-        <div className="popularityPage-ratingGraph-container">
-          <div className="popularityPage-ratingGraph">
-            <Bar data={ratingData} options={ratingOptions} />
-          </div>
-        </div>
+  const airingOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      title: {
+        display: true,
+        text: 'Anime Airing Year Distribution',
+        font: {
+          size: 20,
+          weight: 700,
+        },
+        color: '#333',
+      },
+      legend: {
+        position: 'top' as const,
+        labels: {
+          font: {
+            size: 14,
+          },
+          color: '#333',
+        },
+      },
+    },
+  };
 
-        <div className="popularityPage-watchedGraph-container">
-          <div className="popularityPage-watchedGraph">
-            <Bar data={watchedData} options={watchedOptions} />
-          </div>
-        </div>
 
-        <div className="popularityPage-genreGraph-container">
-          <div className="popularityPage-genreGraph">
-            <Pie data={genreData} options={genreOptions} />
-          </div>
-        </div>
-        
+  return (
+  <div className="popularityPage-body">
+      <div className= "popularityPage-header">
+        <h2 className="popularityPage-title">Top Anime Insights</h2>
       </div>
-    );
+
+      <div className="popularityPage-ratingGraph-container">
+        <div className="popularityPage-ratingGraph">
+          <Bar data={ratingData} options={ratingOptions} />
+        </div>
+      </div>
+
+      <div className="popularityPage-airingGraph-container">
+        <div className="popularityPage-airingGraph">
+          <Line data={airingData} options={airingOptions} />
+        </div>
+      </div>
+
+      <div className="popularityPage-genreGraph-container">
+        <div className="popularityPage-genreGraph">
+          <Pie data={genreData} options={genreOptions} />
+        </div>
+      </div>
+
+      <div className="popularityPage-watchedGraph-container">
+        <div className="popularityPage-watchedGraph">
+          <Bar data={watchedData} options={watchedOptions} />
+        </div>
+      </div>
+      
+    </div>
+  );
 }
 
 export default Popularity;
