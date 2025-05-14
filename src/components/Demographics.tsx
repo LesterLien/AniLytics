@@ -11,7 +11,7 @@ function Demographics() {
   const [locationBars, setLocationBars] = useState<Record<string, number>>({});
 
     useEffect(() => {
-    fetch("http://localhost:4000/user-demographics")
+    fetch("http://localhost:4000/demographics")
       .then(res => res.json())
       .then(({age, gender, location}) => {
         setAgeBars(age);

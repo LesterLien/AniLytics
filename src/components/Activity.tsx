@@ -8,7 +8,7 @@ ChartJS.register(CategoryScale, LinearScale, Tooltip, Title, ArcElement, Legend,
 function Activity() {
         const [joinDateBars, setjoinDateBars] = useState<Record<string, number>>({});
     useEffect(() => {
-        fetch("http://localhost:4000/user-activity")
+        fetch("http://localhost:4000/activity")
         .then(res => res.json())
         .then(({joinDate}) => {
 

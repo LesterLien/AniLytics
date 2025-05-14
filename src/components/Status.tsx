@@ -9,7 +9,7 @@ ChartJS.register(CategoryScale, Tooltip, Title, ArcElement, Legend);
 function Status() {
     const [statusBars, setStatusBars] = useState<Record<string, number>>({});
     useEffect(() => {
-        fetch("http://localhost:4000/user-animeStatus")
+        fetch("http://localhost:4000/status")
         .then(res => res.json())
         .then(({status}) => {
 
