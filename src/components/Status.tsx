@@ -12,9 +12,9 @@ function Status() {
     useEffect(() => {
         fetch("http://localhost:4000/user-animeStatus")
         .then(res => res.json())
-        .then(({percentageStatus}) => {
+        .then(({status}) => {
 
-            setStatusBars(percentageStatus);
+            setStatusBars(status);
         })
         .catch(error => console.error(error));
     },[]);

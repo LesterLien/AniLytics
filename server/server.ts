@@ -157,12 +157,16 @@ app.get('/user-animeStatus', async (req, res) => {
       plantowatch: 0
     };
 
+    const joinData = {};
+
     users.forEach(user => {
       status.watching += parseInt(user.user_watching) || 0;
       status.completed += parseInt(user.user_completed) || 0;
       status.onhold += parseInt(user.user_onhold) || 0;
       status.dropped += parseInt(user.user_dropped) || 0;
       status.plantowatch += parseInt(user.user_plantowatch) || 0;
+      const joinDate = new Date(user.join_date);
+      joinData[joinDate.getFullYear()] = (joinData[joinDate.getFullYear()] || 0) + 1;
     });
 
     const totalStatus = status.watching + status.completed + status.onhold + status.dropped + status.plantowatch;
@@ -177,7 +181,7 @@ app.get('/user-animeStatus', async (req, res) => {
     };
 
 
-    res.json({ percentageStatus});
+    res.json({ status: percentageStatus, joinDate: joinData});
   } catch (error) {
     console.error('PostgreSQL error:', error.message);
     res.status(500).json({ error: error.message });
