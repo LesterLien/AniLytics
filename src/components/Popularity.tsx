@@ -14,7 +14,7 @@ function Popularity() {
 
 
   useEffect(() => {
-    fetch("http://localhost:4000/anime-popularity")
+    fetch("http://localhost:4000/popularity")
       .then(res => res.json())
       .then(({rating, watched, genre, airing}) => {
         const ratingsObject: Record<string, number> = {};

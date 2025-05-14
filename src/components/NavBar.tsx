@@ -24,22 +24,22 @@ function NavBar() {
                     <Link to="/popularity">Top Anime Insights</Link>
                 </div>
                 <div className="navbarPage-text">
-                    <Link to="/status">User Completion Trends</Link>
+                    <Link to="/status">Anime Status Trends</Link>
                 </div>
                 <div className="navbarPage-text">
-                    <Link to="/activity">User Engagement</Link>
+                    <Link to="/activity">User Engagement Trends</Link>
                 </div>
                 <div className="navbarPage-text">
-                    <Link to="/production">Studios & Sources</Link>
+                    <Link to="/production">Production & Licensing</Link>
                 </div>
                 <div className="navbarPage-text">
-                    <Link to="/genre">Genre Trends Over Time</Link>
+                    <Link to="/genre">Genre Trends</Link>
                 </div>
                 <div className="navbarPage-text">
-                    <Link to="/ratings">Ratings & Correlations</Link>
+                    <Link to="/ratings">Rating Correlations</Link>
                 </div>
                 <div className="navbarPage-text">
-                    <Link to="/insights">User Insights</Link>
+                    <Link to="/insights">Culture Insights</Link>
                 </div>
 
             </div>

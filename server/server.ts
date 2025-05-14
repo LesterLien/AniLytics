@@ -17,7 +17,7 @@ const pool = new Pool({
   port: process.env.PG_PORT,
 });
 
-app.get('/user-demographics', async (req, res) => {
+app.get('/demographics', async (req, res) => {
   try {
     const result = await pool.query('SELECT birth_date, gender, location FROM users');
     const users = result.rows;
@@ -65,7 +65,7 @@ app.get('/user-demographics', async (req, res) => {
   }
 });
 
-app.get('/anime-popularity', async (req, res) => {
+app.get('/popularity', async (req, res) => {
   try {
     const ratingResult = await pool.query(
       `SELECT rank, title, scored_by, score
@@ -137,6 +137,82 @@ app.get('/anime-popularity', async (req, res) => {
   }
 });
 
+app.get('/status', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT user_watching, user_completed, user_onhold, user_dropped, user_plantowatch
+      FROM users
+    `);
+    const users = result.rows;
+
+    if (!users || users.length === 0) {
+      return res.status(500).json({ error: 'User data is empty' });
+    }
+
+    let status = {
+      watching: 0,
+      completed: 0,
+      onhold: 0,
+      dropped: 0,
+      plantowatch: 0
+    };
+
+
+    users.forEach(user => {
+      status.watching += parseInt(user.user_watching) || 0;
+      status.completed += parseInt(user.user_completed) || 0;
+      status.onhold += parseInt(user.user_onhold) || 0;
+      status.dropped += parseInt(user.user_dropped) || 0;
+      status.plantowatch += parseInt(user.user_plantowatch) || 0;
+    });
+
+    const totalStatus = status.watching + status.completed + status.onhold + status.dropped + status.plantowatch;
+
+
+    const percentageStatus = {
+      "Watching": (status.watching / totalStatus)*100,
+      "Completed": (status.completed / totalStatus)*100,
+      "On Hold": (status.onhold / totalStatus)*100,
+      "Dropped": (status.dropped / totalStatus)*100,
+      "Plan To Watch": (status.plantowatch / totalStatus)*100
+    };
+
+
+    res.json({ status: percentageStatus});
+  } catch (error) {
+    console.error('PostgreSQL error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/activity', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT join_date 
+      FROM users
+    `);
+
+    const users = result.rows;
+
+    if (!users || users.length === 0) {
+      return res.status(500).json({ error: 'User data is empty' });
+    }
+
+    const joinData = {};
+
+     users.forEach(user => {
+      const joinDate = new Date(user.join_date);
+      joinData[joinDate.getFullYear()] = (joinData[joinDate.getFullYear()] || 0) + 1;
+    });
+
+    res.json({joinDate: joinData});
+  } catch (error) {
+    console.error('PostgreSQL error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 app.get('/user-time', async (req, res) => {
   try {
     const result = await pool.query('SELECT user_days_spent_watching FROM users');
@@ -164,52 +240,6 @@ app.get('/user-time', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-
-app.get('/user-animeStatus', async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT user_watching, user_completed, user_onhold, user_dropped, user_plantowatch 
-      FROM users
-    `);
-    const users = result.rows;
-
-    if (!users || users.length === 0) {
-      return res.status(500).json({ error: 'User data is empty' });
-    }
-
-    let total = {
-      watching: 0,
-      completed: 0,
-      onhold: 0,
-      dropped: 0,
-      plantowatch: 0
-    };
-
-    users.forEach(user => {
-      total.watching += parseInt(user.user_watching) || 0;
-      total.completed += parseInt(user.user_completed) || 0;
-      total.onhold += parseInt(user.user_onhold) || 0;
-      total.dropped += parseInt(user.user_dropped) || 0;
-      total.plantowatch += parseInt(user.user_plantowatch) || 0;
-    });
-
-    const userCount = users.length;
-    const averages = {
-      watching: total.watching / userCount,
-      completed: total.completed / userCount,
-      onhold: total.onhold / userCount,
-      dropped: total.dropped / userCount,
-      plantowatch: total.plantowatch / userCount
-    };
-
-    res.json({ total, averages });
-  } catch (error) {
-    console.error('PostgreSQL error:', error.message);
-    res.status(500).json({ error: error.message });
-  }
-});
-
 
 app.get('/anime', async (req, res) => {
   try {
