@@ -140,7 +140,7 @@ app.get('/anime-popularity', async (req, res) => {
 app.get('/user-animeStatus', async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT user_watching, user_completed, user_onhold, user_dropped, user_plantowatch, join_date 
+      SELECT user_watching, user_completed, user_onhold, user_dropped, user_plantowatch
       FROM users
     `);
     const users = result.rows;
@@ -157,7 +157,6 @@ app.get('/user-animeStatus', async (req, res) => {
       plantowatch: 0
     };
 
-    const joinData = {};
 
     users.forEach(user => {
       status.watching += parseInt(user.user_watching) || 0;
@@ -165,8 +164,6 @@ app.get('/user-animeStatus', async (req, res) => {
       status.onhold += parseInt(user.user_onhold) || 0;
       status.dropped += parseInt(user.user_dropped) || 0;
       status.plantowatch += parseInt(user.user_plantowatch) || 0;
-      const joinDate = new Date(user.join_date);
-      joinData[joinDate.getFullYear()] = (joinData[joinDate.getFullYear()] || 0) + 1;
     });
 
     const totalStatus = status.watching + status.completed + status.onhold + status.dropped + status.plantowatch;
@@ -181,15 +178,39 @@ app.get('/user-animeStatus', async (req, res) => {
     };
 
 
-    res.json({ status: percentageStatus, joinDate: joinData});
+    res.json({ status: percentageStatus});
   } catch (error) {
     console.error('PostgreSQL error:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
 
+app.get('/user-activity', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT join_date 
+      FROM users
+    `);
 
+    const users = result.rows;
 
+    if (!users || users.length === 0) {
+      return res.status(500).json({ error: 'User data is empty' });
+    }
+
+    const joinData = {};
+
+     users.forEach(user => {
+      const joinDate = new Date(user.join_date);
+      joinData[joinDate.getFullYear()] = (joinData[joinDate.getFullYear()] || 0) + 1;
+    });
+
+    res.json({joinDate: joinData});
+  } catch (error) {
+    console.error('PostgreSQL error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 
 app.get('/user-time', async (req, res) => {

@@ -1,14 +1,13 @@
 import '../styles/Status.css';
 import { useEffect, useState } from "react";
-import { Pie, Line } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, LinearScale, Tooltip, Title, ArcElement, Legend, LineElement, PointElement} from "chart.js";
+import { Pie} from "react-chartjs-2";
+import { Chart as ChartJS, CategoryScale, Tooltip, Title, ArcElement, Legend} from "chart.js";
 import type { TooltipItem } from 'chart.js';
 
-ChartJS.register(CategoryScale, LinearScale, Tooltip, Title, ArcElement, Legend, LineElement, PointElement);
+ChartJS.register(CategoryScale, Tooltip, Title, ArcElement, Legend);
 
 function Status() {
     const [statusBars, setStatusBars] = useState<Record<string, number>>({});
-
     useEffect(() => {
         fetch("http://localhost:4000/user-animeStatus")
         .then(res => res.json())
@@ -74,6 +73,7 @@ function Status() {
             }
         },
     };
+
 
     return (
     <div className="statusPage-body">
