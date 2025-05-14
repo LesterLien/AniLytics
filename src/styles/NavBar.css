@@ -6,12 +6,15 @@
 }
 
 .navbarPage-container {
-    padding: 1px;
+    display: flex;
+    flex-direction: column;
     height: 99vh;
     background-color: black;
     border-radius: 5px;
     position: sticky !important;
     top: 0;
+    box-sizing: border-box;
+    padding: 1px;
 }
 
 .navbarPage-container-title {
@@ -38,7 +41,7 @@
 }
 
 .navbarPage-container-text {
-    height: 92.6%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     background-color: #151718;
@@ -46,6 +49,7 @@
     margin: 3px;
     padding: 5px;
     border: 1px solid #262727;
+    box-sizing: border-box;
 }
 
 .navbarPage-text-menu {
