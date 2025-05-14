@@ -1,3 +1,22 @@
+.activityPage-body {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    
+}
+
+.activityPage-header {
+    width: 100%;
+    height: 100px;
+    border-bottom: 2px solid #EBEBEB;
+    margin-bottom: 10px;
+}
+
+.activityPage-title {
+    font-weight: bold;
+}
+
 .activityPage-joinedDateGraph-container {
     height: 430px;
     display: flex;
