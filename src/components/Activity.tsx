@@ -91,7 +91,8 @@ function Activity() {
             label: 'User Counts',
             data: joinedDateCounts,
             backgroundColor: 'rgba(54, 162, 235, 0.6)',  
-            borderColor: 'rgba(54, 162, 235, 0.6)',
+            borderColor: 'rgba(80, 77, 77, 0.6)',
+            borderWidth: 2,
             fill: false,
             tension: 0.1
         },
