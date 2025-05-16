@@ -188,7 +188,7 @@ app.get('/status', async (req, res) => {
 app.get('/activity', async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT join_date 
+      SELECT join_date, user_days_spent_watching 
       FROM users
     `);
 
@@ -199,13 +199,41 @@ app.get('/activity', async (req, res) => {
     }
 
     const joinData = {};
+    const daysSpentData = {};
+    
 
-     users.forEach(user => {
+    const daysSpentGrouped = [
+      { label: '0-5', min: 0, max: 5 },
+      { label: '6-15', min: 6, max: 15 },
+      { label: '16-30', min: 16, max: 30 },
+      { label: '31-50', min: 31, max: 50 },
+      { label: '51-75', min: 51, max: 75 },
+      { label: '76-100', min: 76, max: 100 },
+      { label: '101-200', min: 101, max: 200 },
+      { label: '201-400', min: 201, max: 400 },
+      { label: '401+', min: 401, max: Infinity }, 
+    ];
+
+    const getWatchRange = (days) => {
+      for (let i = 0; i < daysSpentGrouped.length; i++) {
+        if (days <= daysSpentGrouped[i].max) 
+          return daysSpentGrouped[i].label;
+      }
+      return 'Out of Range';
+    };
+
+
+
+    users.forEach(user => {
       const joinDate = new Date(user.join_date);
       joinData[joinDate.getFullYear()] = (joinData[joinDate.getFullYear()] || 0) + 1;
+
+      const daysSpentLabel = getWatchRange(user.user_days_spent_watching);
+      daysSpentData[daysSpentLabel] = (daysSpentData[daysSpentLabel] || 0) + 1;
     });
 
-    res.json({joinDate: joinData});
+
+    res.json({joinDate: joinData, daysSpentWatching: daysSpentData});
   } catch (error) {
     console.error('PostgreSQL error:', error.message);
     res.status(500).json({ error: error.message });
