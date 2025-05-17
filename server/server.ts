@@ -263,34 +263,46 @@ app.get('/activity', async (req, res) => {
   }
 });
 
-
-app.get('/user-time', async (req, res) => {
+app.get('/production', async (req, res) => {
   try {
-    const result = await pool.query('SELECT user_days_spent_watching FROM users');
+    const result = await pool.query(`
+      SELECT source
+      FROM anime
+    `);
+
     const users = result.rows;
 
     if (!users || users.length === 0) {
       return res.status(500).json({ error: 'User data is empty' });
     }
 
-    let totalTime = 0;
+    const sourceData = {};
+    const sourceList = new Set([
+      'Manga',
+      'Original',
+      'Light novel',
+      'Visual novel',
+      '4-koma manga',
+      'Novel',
+      'Game',
+      'Web manga',
+      'Other'
+    ]);
 
-    users
-      .filter(user => user.user_days_spent_watching !== null)
-      .forEach(user => {
-        const time = parseFloat(user.user_days_spent_watching);
-        totalTime += time;
-      });
+    users.forEach(user => {
+      const sources = sourceList.has(user.source) ? user.source : 'Other';
+      sourceData[sources] = (sourceData[sources] || 0) + 1;
+    });
 
-    const userCount = users.length;
-    const avgTimePerUser = userCount > 0 ? totalTime / userCount : 0;
 
-    res.json(avgTimePerUser);
+    res.json({source: sourceData})
+
   } catch (error) {
     console.error('PostgreSQL error:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
+
 
 app.get('/anime', async (req, res) => {
   try {
