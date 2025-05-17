@@ -13,14 +13,14 @@ function Navigator() {
     return (
         <Routes>
             <Route path="/" element={<Dashboard/>}/>
-            <Route path="/demographics" element={<Demographics/>}/>
+            <Route path="/demographic" element={<Demographics/>}/>
             <Route path="/popularity" element={<Popularity/>}/>
             <Route path="/status" element={<Status/>}/>
             <Route path="/activity" element={<Activity/>}/>
-            <Route path="/status" element={<Production/>}/>
+            <Route path="/production" element={<Production/>}/>
             <Route path="/genre" element={<Genres/>}/>
-            <Route path="/ratings" element={<Ratings/>}/>
-            <Route path="/insights" element={<Insights/>}/>
+            <Route path="/rating" element={<Ratings/>}/>
+            <Route path="/insight" element={<Insights/>}/>
         </Routes>
     );
 }
