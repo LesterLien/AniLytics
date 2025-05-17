@@ -1,4 +1,4 @@
-function Ratings() {
+function Insight() {
     return (
        <div>
         
@@ -6,4 +6,4 @@ function Ratings() {
     );
 }
 
-export default Ratings;
+export default Insight;

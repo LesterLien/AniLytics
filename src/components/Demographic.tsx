@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import { Bar, Pie } from "react-chartjs-2";
 import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, LogarithmicScale, Tooltip, Title, ArcElement, Legend } from "chart.js";
-import '../styles/Demographics.css';
+import '../styles/Demographic.css';
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, LogarithmicScale, Tooltip, Title, ArcElement, Legend);
 
-function Demographics() {
+function Demographic() {
   const [ageBars, setAgeBars] = useState<Record<string, number>>({});
   const [genderBars, setGenderBars] = useState<Record<string, number>>({});
   const [locationBars, setLocationBars] = useState<Record<string, number>>({});
 
     useEffect(() => {
-    fetch("http://localhost:4000/demographics")
+    fetch("http://localhost:4000/demographic")
       .then(res => res.json())
       .then(({age, gender, location}) => {
         setAgeBars(age);
@@ -189,4 +189,4 @@ function Demographics() {
   );
 }
 
-export default Demographics;
+export default Demographic;
