@@ -17,7 +17,8 @@
     font-weight: bold;
 }
 
-.activityPage-joinedDateGraph-container {
+.activityPage-joinedDateGraph-container,
+.activityPage-averageRatingGraph-container {
     height: 430px;
     display: flex;
     flex-direction: column;
@@ -27,7 +28,8 @@
     padding: 5px;
 }
 
-.activityPage-joinedDateGraph {
+.activityPage-joinedDateGraph,
+.activityPage-averageRatingGraph {
     display: flex;
     justify-content: center;  
     align-items: center;

@@ -8,13 +8,17 @@ ChartJS.register(CategoryScale, LinearScale, Tooltip, Title, ArcElement, Legend,
 function Activity() {
     const [joinDateBars, setJoinDateBars] = useState<Record<string, number>>({});
     const [daysSpentWatchingBars, setDaysSpentWatchingBars] = useState<Record<string, number>>({});
+    const [averageRatingBars, setAverageRatingBars] = useState<Record<string, number>>({});
+
+
     useEffect(() => {
         fetch("http://localhost:4000/activity")
         .then(res => res.json())
-        .then(({joinDate, daysSpentWatching}) => {
+        .then(({joinDate, daysSpentWatching, averageRating}) => {
 
             setJoinDateBars(joinDate);
             setDaysSpentWatchingBars(daysSpentWatching);
+            setAverageRatingBars(averageRating);
         })
         .catch(error => console.error(error));
     },[]);
@@ -22,15 +26,58 @@ function Activity() {
     const getStartNumber = (label: string): number => {
         if (label.includes('+')) {
             return Number(label.replace('+', ''));
-        } 
+        }
+
         return Number(label.split('-')[0]);
     };
 
-    const sortedDaysSpentWatchingLabels = Object.keys(daysSpentWatchingBars).sort((labelA, labelB) => {  
-        const startAgeA = getStartNumber(labelA);
-        const startAgeB = getStartNumber(labelB);
-        return startAgeA - startAgeB; 
-    });
+    const sortGroupedLabels = (labels: string[]): string[] => {
+        return labels.sort((a, b) => getStartNumber(a) - getStartNumber(b));
+    };
+
+    const sortedDaysSpentWatchingLabels = sortGroupedLabels(Object.keys(daysSpentWatchingBars));
+    const sortedAverageRatingLabels = sortGroupedLabels(Object.keys(averageRatingBars)); 
+
+    const averageRatingCounts = sortedAverageRatingLabels.map(ratingRange => averageRatingBars[ratingRange]);
+    const averageRatingData = {
+        labels: sortedAverageRatingLabels,
+        datasets: [
+        {
+            label: 'User Counts',
+            data: averageRatingCounts,
+            backgroundColor: 'rgba(54, 162, 235, 0.6)',  
+            borderColor: 'rgba(80, 77, 77, 0.6)',
+            borderWidth: 2,
+            fill: false,
+            tension: 0.1
+        },
+        ],
+    };
+
+    const averageRatingOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+        title: {
+            display: true,
+            text: 'User Average Rating',
+            font: {
+            size: 20,
+            weight: 700,
+            },
+            color: '#333',
+        },
+        legend: {
+            position: 'top' as const,
+            labels: {
+            font: {
+                size: 14,
+            },
+            color: '#333',
+            },
+        },
+        },
+    };
 
     const daysSpentWatchingCounts = sortedDaysSpentWatchingLabels.map(dayRange => daysSpentWatchingBars[dayRange]);
     const daysSpentWatchingData = {
@@ -67,6 +114,7 @@ function Activity() {
             size: 20,             
             weight: 700,       
             },
+            color: '#333',
         },
         tooltip: {
             enabled: true,
@@ -138,6 +186,12 @@ function Activity() {
             <div className="activityPage-joinedDateGraph-container">
                 <div className="activityPage-joinedDateGraph">
                 <Line data={joinedDateData} options={joinedDateOptions} />
+                </div>
+            </div>
+
+            <div className="activityPage-averageRatingGraph-container">
+                <div className="activityPage-averageRatingGraph">
+                <Line data={averageRatingData} options={averageRatingOptions} />
                 </div>
             </div>
        </div>

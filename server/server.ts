@@ -188,7 +188,7 @@ app.get('/status', async (req, res) => {
 app.get('/activity', async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT join_date, user_days_spent_watching 
+      SELECT join_date, user_days_spent_watching, stats_mean_score 
       FROM users
     `);
 
@@ -200,6 +200,7 @@ app.get('/activity', async (req, res) => {
 
     const joinData = {};
     const daysSpentData = {};
+    const averageRatingData = {};
     
 
     const daysSpentGrouped = [
@@ -214,26 +215,48 @@ app.get('/activity', async (req, res) => {
       { label: '401+', min: 401, max: Infinity }, 
     ];
 
-    const getWatchRange = (days) => {
-      for (let i = 0; i < daysSpentGrouped.length; i++) {
-        if (days <= daysSpentGrouped[i].max) 
-          return daysSpentGrouped[i].label;
-      }
-      return 'Out of Range';
-    };
+    const averageRatingGrouped = [
+      { label: '0-1', min: 0.0, max: 0.99 },
+      { label: '1-2', min: 1.0, max: 1.99 },
+      { label: '2-3', min: 2.0, max: 2.99 },
+      { label: '3-4', min: 3.0, max: 3.99 },
+      { label: '4-5', min: 4.0, max: 4.99 },
+      { label: '5-6', min: 5.0, max: 5.99 },
+      { label: '6-6.49', min: 6.0, max: 6.49 },
+      { label: '6.5-6.99', min: 6.5, max: 6.99 },
+      { label: '7-7.49', min: 7.0, max: 7.49 },
+      { label: '7.5-7.99', min: 7.5, max: 7.99 },
+      { label: '8-8.49', min: 8.0, max: 8.49 },
+      { label: '8.5-8.99', min: 8.5, max: 8.99 },
+      { label: '9-9.49', min: 9.0, max: 9.49 },
+      { label: '9.5-9.99', min: 9.5, max: 9.99 },
+      { label: '10', min: 10.0, max: 10.0 },
+    ];
 
+
+    const getRange = (value: number, groups: { label: string, min: number, max: number }[]): string => {
+      for (let i = 0; i < groups.length; i++) {
+        if (value >= groups[i].min && value <= groups[i].max) {
+          return groups[i].label;
+        }
+      }
+    return 'Out of Range';
+    };
 
 
     users.forEach(user => {
       const joinDate = new Date(user.join_date);
       joinData[joinDate.getFullYear()] = (joinData[joinDate.getFullYear()] || 0) + 1;
 
-      const daysSpentLabel = getWatchRange(user.user_days_spent_watching);
+      const daysSpentLabel = getRange(user.user_days_spent_watching, daysSpentGrouped);
       daysSpentData[daysSpentLabel] = (daysSpentData[daysSpentLabel] || 0) + 1;
+
+      const averageRatingLabel = getRange(user.stats_mean_score, averageRatingGrouped);
+      averageRatingData[averageRatingLabel] = (averageRatingData[averageRatingLabel] || 0) + 1;
     });
 
 
-    res.json({joinDate: joinData, daysSpentWatching: daysSpentData});
+    res.json({joinDate: joinData, daysSpentWatching: daysSpentData, averageRating: averageRatingData });
   } catch (error) {
     console.error('PostgreSQL error:', error.message);
     res.status(500).json({ error: error.message });
