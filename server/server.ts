@@ -17,7 +17,7 @@ const pool = new Pool({
   port: process.env.PG_PORT,
 });
 
-app.get('/demographics', async (req, res) => {
+app.get('/demographic', async (req, res) => {
   try {
     const result = await pool.query('SELECT birth_date, gender, location FROM users');
     const users = result.rows;

@@ -1,19 +1,19 @@
 import { Routes, Route } from 'react-router-dom';
 import Dashboard from './Dashboard';
-import Demographics from './Demographics'
+import Demographic from './Demographic'
 import Popularity from './Popularity';
 import Status from './Status';
 import Activity from './Activity';
 import Production from './Production';
-import Genres from './Genres';
-import Ratings from './Ratings';
-import Insights from './Insights';
+import Genres from './Genre';
+import Ratings from './Rating';
+import Insights from './Insight';
 
 function Navigator() {
     return (
         <Routes>
             <Route path="/" element={<Dashboard/>}/>
-            <Route path="/demographic" element={<Demographics/>}/>
+            <Route path="/demographic" element={<Demographic/>}/>
             <Route path="/popularity" element={<Popularity/>}/>
             <Route path="/status" element={<Status/>}/>
             <Route path="/activity" element={<Activity/>}/>
